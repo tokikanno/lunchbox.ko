@@ -1,0 +1,109 @@
+<html>
+<head>
+	<title>Lunch Box - Login</title>
+
+	<script type="text/javascript" src="/static/lib/knockout/knockout-2.2.1.js"></script>
+	<script type="text/javascript" src="/static/lib/knockout/ko.observableDictionary.js"></script>
+	
+	<script type="text/javascript" src="/static/lib/jquery/jquery-1.10.1.min.js"></script>
+	<script type="text/javascript" src="/static/lib/jquery/jquery.validate.min.js"></script>
+	
+	<script type="text/javascript" src="/static/lib/bootstrap/js/bootstrap.min.js"></script>
+
+	<link rel="stylesheet" type="text/css" href="/static/lib/bootstrap/css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="/static/app/css/wait-mask.css">
+	<link rel="stylesheet" type="text/css" href="/static/app/css/login-form.css">
+
+<script type="text/javascript">
+$(function () {
+//	$(".form-signin").validate();
+
+	var WaitingMask = function() {
+		var self = this;
+		self.visible = ko.observable(false);
+		self.msg = ko.observable();
+		self.enable = function (msg) {
+			self.msg(msg);
+			self.visible(true);
+		}
+		self.disable = function () {
+			self.visible(false);
+			self.msg("");
+		}
+	};
+
+	var LoginForm = function () {
+		var self = this;
+
+		self.username = ko.observable();
+		self.password = ko.observable();
+		self.login_error = ko.observable();
+
+		self.login = function (elem) {
+			em = ko.contextFor(elem);
+			em.$root.waiting_mask.enable('Verifying your login info ...');
+
+			$.post("/login", ko.toJSON({
+				username: self.username,
+				password: self.password
+			})).done(function (result) {
+				if (!result){
+					self.login_error = "Unknown error"
+					return;
+				}
+
+				if (!result.result){
+					self.login_error(result.msg);
+				}else{
+					// redirect to site root
+					window.location = "/";
+				}
+			}).fail(function (resp)	{
+				alert(resp.status + ' - ' + resp.statusText);
+			}).always(function () {
+				self.password("");
+				em.$root.waiting_mask.disable();
+			});
+		};
+	}
+
+	var AppView = function () {
+		var self = this;
+		
+		self.waiting_mask = new WaitingMask();
+		self.login_form = new LoginForm();
+	};
+
+	app = new AppView();
+	ko.applyBindings(app);
+});
+</script>
+
+</head>
+
+<body>
+	<div class="container">
+		<!-- ko with: login_form -->
+		<form data-bind="submit: login" class="form-signin">
+			<h2 class="form-signin-heading">Please sign in</h2>
+			<!-- ko if: login_error -->
+			<div class="alert alert-error fade in">
+	            <button type="button" class="close" data-dismiss="alert">×</button>
+	            <strong>Login Error !</strong>&nbsp;&nbsp;<!-- ko text: login_error --><!-- /ko -->
+          	</div>
+          	<!-- /ko -->
+			<input data-bind="value: username" name="email" type="email" class="input-block-level" placeholder="Email address" required>
+			<input data-bind="value: password" type="password" name="password" class="input-block-level" placeholder="Password" required>
+			<button class="btn btn-primary" type="submit">Sign in</button>
+		</form>
+		<!-- /ko -->
+	</div>
+
+	<!-- ko with: waiting_mask -->
+	<div class="wait-mask" data-bind="visible: visible">
+		<div class="wait-mask-text" data-bind="text: msg"></div>
+	</div>
+	<!-- /ko -->
+</body>
+
+</html>
