@@ -32,7 +32,6 @@ $(function () {
 		}
 	};
 
-
 	var ShopItem = function (data) {
 		var self = this;
 
@@ -119,12 +118,31 @@ $(function () {
 		self.top_menu = new TopMenu();
 		self.waiting_mask = new WaitingMask();
 		self.active_order_list = ko.observable();
+		self.order_detail = ko.observable();
 
+		self.clear_all_ui_binding = function () {
+			self.active_order_list(null);
+			self.order_detail(null);
+		};
+
+		// activate client side route
 		Sammy(function() {
+			this.get('#order/:oid', function () {
+				debugger
+				self.top_menu.select_item('order');
+				self.clear_all_ui_binding();
+				self.waiting_mask.enable("載入中");
+
+				$.get("/order/" + this.params.oid, self.order_detail).always(function(){
+					self.waiting_mask.disable();
+				});				
+			});
+
 			this.get('#:top_menu_item', function () {
 				top_menu_item = this.params.top_menu_item;
 
 				self.top_menu.select_item(top_menu_item);
+				self.clear_all_ui_binding();
 				self.waiting_mask.enable("載入中");
 
 				switch(top_menu_item){
@@ -165,8 +183,7 @@ $(function () {
 		</div>
 
 		<div data-bind="with: active_order_list" class="row-fluid">
-			
-			<!-- ko if: $data.length == 0 -->
+			<!-- ko if: $data.length <= 0 -->
 			<div class="box no-active-order">
 				<div>
 				現在沒有任何開放中的團購，你是否要<a href="/#new">建立一個新的團購</a>?
@@ -174,13 +191,23 @@ $(function () {
 			</div>
 			<!-- /ko -->
 
+			<!-- ko if: $data.length > 0 -->
+			<h3>開放中的團購</h3>
+			<!-- /ko -->
+
 			<!-- ko foreach: $data -->
-			<div class="box">
-				<div data-bind="text: name"></div>
-				<div data-bind="text: description"></div>
+			<div class="box" style="margin-top: 10px; margin-bottom: 10px;">
+				<div style="margin: 20px;">
+				<div class="page-header">
+					<a data-bind="attr: {href: '/#order/' + _id.$oid}" class="btn btn-primary pull-right">我要參加</a>
+					<h3 data-bind="text: name"></h3>
+				</div>
+				<p data-bind="text: description"></p>
+				</div>
 			</div>
 			<!-- /ko -->
 		</div>
+
 	</div>
 
 	<!-- ko with: waiting_mask -->
