@@ -1,6 +1,6 @@
 <html>
 <head>
-	<title>Lunch Box - Login</title>
+	<title>Lunch Box - 登入</title>
 
 	<script type="text/javascript" src="/static/lib/knockout/knockout-2.2.1.js"></script>
 	<script type="text/javascript" src="/static/lib/knockout/ko.observableDictionary.js"></script>
@@ -41,14 +41,14 @@ $(function () {
 
 		self.login = function (elem) {
 			em = ko.contextFor(elem);
-			em.$root.waiting_mask.enable('Verifying your login info ...');
+			em.$root.waiting_mask.enable('登入中');
 
 			$.post("/login", ko.toJSON({
 				username: self.username,
 				password: self.password
 			})).done(function (result) {
 				if (!result){
-					self.login_error = "Unknown error"
+					self.login_error = "未知的錯誤"
 					return;
 				}
 
@@ -85,16 +85,16 @@ $(function () {
 	<div class="container">
 		<!-- ko with: login_form -->
 		<form data-bind="submit: login" class="form-signin">
-			<h2 class="form-signin-heading">Please sign in</h2>
+			<h2 class="form-signin-heading">Lunch Box 登入</h2>
 			<!-- ko if: login_error -->
 			<div class="alert alert-error fade in">
 	            <button type="button" class="close" data-dismiss="alert">×</button>
-	            <strong>Login Error !</strong>&nbsp;&nbsp;<!-- ko text: login_error --><!-- /ko -->
+	            <strong>登入錯誤 !</strong>&nbsp;&nbsp;<!-- ko text: login_error --><!-- /ko -->
           	</div>
           	<!-- /ko -->
-			<input data-bind="value: username" name="email" type="email" class="input-block-level" placeholder="Email address" required>
-			<input data-bind="value: password" type="password" name="password" class="input-block-level" placeholder="Password" required>
-			<button class="btn btn-primary" type="submit">Sign in</button>
+			<input data-bind="value: username" name="email" type="email" class="input-block-level" placeholder="電子郵件" required>
+			<input data-bind="value: password" type="password" name="password" class="input-block-level" placeholder="密碼" required minlength=4 maxlength=10>
+			<button class="btn btn-primary pull-right" type="submit">Sign in</button>
 		</form>
 		<!-- /ko -->
 	</div>

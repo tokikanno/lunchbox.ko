@@ -1,0 +1,193 @@
+<html>
+<head>
+	<title>Lunch Box - Main</title>
+
+	<script type="text/javascript" src="/static/lib/knockout/knockout-2.2.1.js"></script>
+	<script type="text/javascript" src="/static/lib/knockout/ko.observableDictionary.js"></script>
+	
+	<script type="text/javascript" src="/static/lib/jquery/jquery-1.10.1.min.js"></script>
+	<script type="text/javascript" src="/static/lib/jquery/jquery.validate.min.js"></script>
+	
+	<script type="text/javascript" src="/static/lib/sammy/sammy-latest.min.js"></script>
+	<script type="text/javascript" src="/static/lib/bootstrap/js/bootstrap.min.js"></script>
+
+	<link rel="stylesheet" type="text/css" href="/static/lib/bootstrap/css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="/static/app/css/wait-mask.css">
+	<link rel="stylesheet" type="text/css" href="/static/app/css/app.css">
+
+<script type="text/javascript">
+$(function () {
+	var WaitingMask = function() {
+		var self = this;
+
+		self.visible = ko.observable(false);
+		self.msg = ko.observable();
+		self.enable = function (msg) {
+			self.msg(msg);
+			self.visible(true);
+		}
+		self.disable = function () {
+			self.visible(false);
+			self.msg("");
+		}
+	};
+
+
+	var ShopItem = function (data) {
+		var self = this;
+
+		self.name = ko.observable();
+		self.price = ko.observable();
+
+		if (data){
+			self.name(data.name);
+			self.price(data.price);
+		}
+	};
+
+	var Shop = function (data) {
+		var self = this;
+
+		self.name = ko.observable();
+		self.description = ko.observable();
+		self.phone = ko.observable();
+		self.addr = ko.observable();
+		self.items = ko.observableArray();
+
+		if (data){
+			self.name(data.name);
+			self.description(data.description);
+			self.phone(data.phone);
+			self.addr(data.addr);
+			if (data.items){
+				data.items().removeAll();
+				$.map(data.items, function (val, index) {
+					item = new ShopItem(val);
+					data.items().push(item);
+				});
+			}
+		}
+	};
+
+	var OrderItem = function (data) {
+		var self = this
+		self.name = ko.observable();
+		self.user = ko.observable();
+		self.price = ko.observable();
+		self.count = ko.observable();
+	};
+
+	var OrderList = function () {
+		var self = this;
+
+		self.owner = ko.observable();
+		self.shop = ko.observable();
+		self.items = ko.observableArray();
+	};
+
+	var TopMenu = function () {
+		var self = this;
+
+		self.items = [
+			{link: 'order', caption: '團購'},
+			{link: 'new', caption: '開團'},
+			{link: 'shop', caption: '店家'}	
+		];
+
+		self.selected_item = ko.observable();
+
+		self.select_item = function (item) {
+			self.selected_item(item);
+		};
+
+		location.hash = self.items[0].link;
+	};
+
+
+	var User = function () {
+		var self = this;
+
+		self.username = ko.observable("{{user.username}}");
+		self.email =  ko.observable("{{user._id}}");
+	};
+
+
+	var AppView = function () {
+		var self = this;
+		
+		self.user = new User();
+		self.top_menu = new TopMenu();
+		self.waiting_mask = new WaitingMask();
+		self.active_order_list = ko.observable();
+
+		Sammy(function() {
+			this.get('#:top_menu_item', function () {
+				top_menu_item = this.params.top_menu_item;
+
+				self.top_menu.select_item(top_menu_item);
+				self.waiting_mask.enable("載入中");
+
+				switch(top_menu_item){
+					case "order":
+						$.get("/order/active", self.active_order_list).always(function(){
+							self.waiting_mask.disable();
+						});
+						break;
+				}
+			});
+		}).run();
+	};
+
+	app = new AppView();
+	ko.applyBindings(app);
+});
+</script>
+
+</head>
+
+<body>
+	<div class="container">
+		<div data-bind="with: user" class="row-fluid">
+			<h3 class="muted span3"> &nbsp; Lunch Box</h3>
+			<div class="pull-right" style="margin-top: 10px; margin-right: 20px;"><!-- ko text: username --><!-- /ko --> | <a href="/logout">登出</a></div>
+		</div>
+
+		<div class="navbar">
+			<div class="navbar-inner">
+				<div class="container" data-bind="with: top_menu">
+					<ul class="nav" data-bind="foreach: items">
+						<li data-bind="css: {active: link == $parent.selected_item() }">
+							<a data-bind="text: caption, attr: {href: '/#' + link}"></a>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+
+		<div data-bind="with: active_order_list" class="row-fluid">
+			
+			<!-- ko if: $data.length == 0 -->
+			<div class="box no-active-order">
+				<div>
+				現在沒有任何開放中的團購，你是否要<a href="/#new">建立一個新的團購</a>?
+				</div>
+			</div>
+			<!-- /ko -->
+
+			<!-- ko foreach: $data -->
+			<div class="box">
+				<div data-bind="text: name"></div>
+				<div data-bind="text: description"></div>
+			</div>
+			<!-- /ko -->
+		</div>
+	</div>
+
+	<!-- ko with: waiting_mask -->
+	<div class="wait-mask" data-bind="visible: visible">
+		<div class="wait-mask-text" data-bind="text: msg"></div>
+	</div>
+	<!-- /ko -->
+</body>
+
+</html>
