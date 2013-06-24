@@ -91,8 +91,6 @@ $(function () {
 		self.select_item = function (item) {
 			self.selected_item(item);
 		};
-
-		location.hash = self.items[0].link;
 	};
 
 
@@ -112,11 +110,16 @@ $(function () {
 		self.waiting_mask = new WaitingMask();
 	};
 
+	// init knockout binding
 	HBAPP.app = new AppView();
 	ko.applyBindings(HBAPP.app);
 
 	// activate client side route
 	Sammy(function() {
+		this.get('/', function () {
+			this.redirect('/#order');
+		});
+
 		this.get('#order/:oid', function () {
 			HBAPP.app.top_menu.select_item('order');
 			HBAPP.unload_content();
