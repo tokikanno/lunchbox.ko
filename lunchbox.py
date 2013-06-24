@@ -17,6 +17,7 @@ urls = (
 	'/login', 'login',
 	'/logout', 'logout',
 	'/order/active', 'active_order',
+	'/shop/simple', 'simple_shop',
 )
 
 app = web.application(urls, globals())
@@ -128,6 +129,11 @@ class login:
 class active_order:
 	def GET(self):
 		return json_resp(list(DB['order'].find({'active': True})))
+
+class simple_shop:
+	def GET(self):
+		return json_resp(list(DB['shop'].find({}, {'name': 1, 'description': 1})))
+
 
 if __name__ == "__main__":
 	app.debug = True
