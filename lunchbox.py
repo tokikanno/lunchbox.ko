@@ -18,6 +18,7 @@ urls = (
 	'/logout', 'logout',
 	'/hbapp/(.+)', 'hbapp',
 	'/order/active', 'active_order',
+	'/new_order/', 'new_order',
 	'/shop/simple', 'simple_shop',
 	'/401', 'Unauthorized',
 	'/403', 'Forbidden',
@@ -128,6 +129,10 @@ class login:
 			result["msg"] = str(e)
 
 		return json_resp(result)
+
+class new_order:
+	def POST(self):
+		return ""
 
 class active_order:
 	def GET(self):
