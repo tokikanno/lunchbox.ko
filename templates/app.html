@@ -23,12 +23,13 @@ $(document).ajaxError(function(event, request, settings) {
 			window.location.href = ".";
 			break;
 		case 403:
-			HBAPP.apply_403();
-			HBAPP.show_content();
+			HBAPP.load_content("403-template");
+			break
+		case 404:
+			HBAPP.load_content("404-template");
 			break
 		case 500:
-			HBAPP.apply_500();
-			HBAPP.show_content();
+			HBAPP.load_content("500-template");
 			break
 		default:
 			break;
@@ -40,24 +41,23 @@ var HBAPP = {
 		$("#hb-app-main").html("").hide();
 	},
 
-	load_content: function(url){
-		$.get(url, function (data) {
-			$("#hb-app-main").html(data);
-		}).fail(function (request) {
+	load_content: function(source){
+		var app_main = $('#hb-app-main');
 
-		});
+		if (document.getElementById(source)){
+			app_main.html($("#" + source).html());
+			app_main.show();
+		} else {
+			$.get(source, function (data) {
+				app_main.html(data);
+			}).fail(function (request) {
+				// My callback
+			});
+		}
 	},
 
 	show_content: function  () {
 		$('#hb-app-main').show();
-	},
-
-	apply_403: function(){
-		$("#hb-app-main").html($("#403-template").html());
-	},
-
-	apply_500: function(){
-		$("#hb-app-main").html($("#500-template").html());
 	}
 };
 
@@ -139,13 +139,16 @@ $(function () {
 					HBAPP.load_content("hbapp/new_order")
 					break;
 				case "403":
-					HBAPP.apply_403();
-					HBAPP.show_content();
+					HBAPP.load_content("403-template");
+					break;
+				case "404":
+					HBAPP.load_content("404-template");
 					break;
 				case "500":
-					HBAPP.apply_500();
-					HBAPP.show_content();
+					HBAPP.load_content("500-template");
 					break;
+				default:
+					HBAPP.load_content("404-template");
 			}
 		});
 	}).run();
@@ -157,6 +160,9 @@ $(function () {
 <body>
 	<script id="403-template" type="text/template">
 		<p class="well">403 - Forbidden</p>
+	</script>
+	<script id="404-template" type="text/template">
+		<p class="well">404 - Page Not Found</p>
 	</script>
 	<script id="500-template" type="text/template">
 		<p class="well">500 - Internal Server Error</p>
