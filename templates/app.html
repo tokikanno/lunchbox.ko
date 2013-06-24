@@ -4,10 +4,10 @@
 
 	<script type="text/javascript" src="/static/lib/knockout/knockout-2.2.1.js"></script>
 	<script type="text/javascript" src="/static/lib/knockout/ko.observableDictionary.js"></script>
-	
+
 	<script type="text/javascript" src="/static/lib/jquery/jquery-1.10.1.min.js"></script>
 	<script type="text/javascript" src="/static/lib/jquery/jquery.validate.min.js"></script>
-	
+
 	<script type="text/javascript" src="/static/lib/sammy/sammy-latest.min.js"></script>
 	<script type="text/javascript" src="/static/lib/bootstrap/js/bootstrap.min.js"></script>
 
@@ -16,6 +16,25 @@
 	<link rel="stylesheet" type="text/css" href="/static/app/css/app.css">
 
 <script type="text/javascript">
+$(document).ajaxError(function(event, request, settings) {
+	switch(request.status){
+		case 401:
+			alert("Unauthorized user!");
+			window.location.href = ".";
+			break;
+		case 403:
+			HBAPP.apply_403();
+			HBAPP.show_content();
+			break
+		case 500:
+			HBAPP.apply_500();
+			HBAPP.show_content();
+			break
+		default:
+			break;
+	}
+});
+
 var HBAPP = {
 	unload_content: function () {
 		$("#hb-app-main").html("").hide();
@@ -25,12 +44,20 @@ var HBAPP = {
 		$.get(url, function (data) {
 			$("#hb-app-main").html(data);
 		}).fail(function (request) {
-			alert(request.status + ' - ' + request.statusText);
+
 		});
 	},
 
 	show_content: function  () {
 		$('#hb-app-main').show();
+	},
+
+	apply_403: function(){
+		$("#hb-app-main").html($("#403-template").html());
+	},
+
+	apply_500: function(){
+		$("#hb-app-main").html($("#500-template").html());
 	}
 };
 
@@ -56,7 +83,7 @@ $(function () {
 		self.items = [
 			{link: 'order', caption: '團購'},
 			{link: 'new', caption: '開團'},
-			{link: 'shop', caption: '店家'}	
+			{link: 'shop', caption: '店家'}
 		];
 
 		self.selected_item = ko.observable();
@@ -79,7 +106,7 @@ $(function () {
 
 	var AppView = function () {
 		var self = this;
-		
+
 		self.user = new User();
 		self.top_menu = new TopMenu();
 		self.waiting_mask = new WaitingMask();
@@ -108,15 +135,30 @@ $(function () {
 				case "new":
 					HBAPP.load_content("hbapp/new_order")
 					break;
+				case "403":
+					HBAPP.apply_403();
+					HBAPP.show_content();
+					break;
+				case "500":
+					HBAPP.apply_500();
+					HBAPP.show_content();
+					break;
 			}
 		});
-	}).run();	
+	}).run();
 });
 </script>
 
 </head>
 
 <body>
+	<script id="403-template" type="text/template">
+		<p class="well">403 - Forbidden</p>
+	</script>
+	<script id="500-template" type="text/template">
+		<p class="well">500 - Internal Server Error</p>
+	</script>
+
 	<div class="container">
 		<div data-bind="with: user" class="row-fluid">
 			<h3 class="muted span3"> &nbsp; Lunch Box</h3>

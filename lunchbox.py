@@ -19,6 +19,8 @@ urls = (
 	'/hbapp/(.+)', 'hbapp',
 	'/order/active', 'active_order',
 	'/shop/simple', 'simple_shop',
+	'/401', 'Unauthorized',
+	'/403', 'Forbidden',
 )
 
 app = web.application(urls, globals())
@@ -138,6 +140,14 @@ class simple_shop:
 class hbapp:
 	def GET(self, name):
 		return render_template("%s.html" % name)
+
+class Unauthorized:
+	def GET(self):
+		raise web.Unauthorized()
+
+class Forbidden:
+	def GET(self):
+		raise web.Forbidden()
 
 if __name__ == "__main__":
 	app.debug = True
