@@ -1,6 +1,4 @@
 web.py
 jinja2
 gevent
-
-# this one should be installed manually from https://github.com/whilefalse/webpy-mongodb-sessions/archive/master.zip
-# webpy-mongodb-sessions
+-e git+https://github.com/whilefalse/webpy-mongodb-sessions/#egg=web_mongodb_sessions
