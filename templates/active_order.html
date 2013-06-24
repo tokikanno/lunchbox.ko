@@ -31,7 +31,7 @@ $(function () {
 		
 		self.active_order_list = ko.observable();
 
-		HBAPP.app.waiting_mask.enable("Loading");
+		HBAPP.app.waiting_mask.enable("載入中");
 		$.get("/order/active", self.active_order_list).success(function  () {
 			HBAPP.show_content();
 		}).always(function(){
