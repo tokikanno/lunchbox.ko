@@ -16,6 +16,7 @@ urls = (
 	'/', 'index',
 	'/login', 'login',
 	'/logout', 'logout',
+	'/hbapp/(.+)', 'hbapp',
 	'/order/active', 'active_order',
 	'/shop/simple', 'simple_shop',
 )
@@ -134,6 +135,9 @@ class simple_shop:
 	def GET(self):
 		return json_resp(list(DB['shop'].find({}, {'name': 1, 'description': 1})))
 
+class hbapp:
+	def GET(self, name):
+		return render_template("%s.html" % name)
 
 if __name__ == "__main__":
 	app.debug = True

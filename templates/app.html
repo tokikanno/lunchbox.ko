@@ -16,7 +16,23 @@
 	<link rel="stylesheet" type="text/css" href="/static/app/css/app.css">
 
 <script type="text/javascript">
-var HopeBayUI = {}
+var HBAPP = {
+	unload_content: function () {
+		$("#hb-app-main").html("").hide();
+	},
+
+	load_content: function(url){
+		$.get(url, function (data) {
+			$("#hb-app-main").html(data);
+		}).fail(function (request) {
+			alert(request.status + ' - ' + request.statusText);
+		});
+	},
+
+	show_content: function  () {
+		$('#hb-app-main').show();
+	}
+};
 
 $(function () {
 	var WaitingMask = function() {
@@ -33,83 +49,6 @@ $(function () {
 			self.msg("");
 		}
 	};
-
-	var ShopItem = function (data) {
-		var self = this;
-
-		self.name = ko.observable();
-		self.price = ko.observable();
-
-		if (data){
-			self.name(data.name);
-			self.price(data.price);
-		}
-	};
-
-	var Shop = function (data) {
-		var self = this;
-
-		self.name = ko.observable();
-		self.description = ko.observable();
-		self.phone = ko.observable();
-		self.addr = ko.observable();
-		self.items = ko.observableArray();
-
-		if (data){
-			self.name(data.name);
-			self.description(data.description);
-			self.phone(data.phone);
-			self.addr(data.addr);
-			if (data.items){
-				data.items().removeAll();
-				$.map(data.items, function (val, index) {
-					item = new ShopItem(val);
-					data.items().push(item);
-				});
-			}
-		}
-
-		self.full_name = ko.computed(function () { return self.name() + " - " + self.description();})
-	};
-
-	var OrderItem = function (data) {
-		var self = this;
-		self.name = ko.observable();
-		self.user = ko.observable();
-		self.price = ko.observable();
-		self.count = ko.observable();
-	};
-
-	var OrderList = function () {
-		var self = this;
-
-		self.owner = ko.observable();
-		self.shop = ko.observable();
-		self.items = ko.observableArray();
-	};
-
-	var NewOrderList = function () {
-		var self = this;
-
-		self.shop_list = ko.observableArray([]);
-		self.order_list = ko.observable(new OrderList());
-		self.shopname = ko.computed(function () {
-			if (!self.order_list())
-				return;
-			if (!self.order_list().shop())
-				return;
-			return self.order_list().shop().name();
-		});
-
-		self.END_DAY = [0, 1, 3, 7, 14];
-		self.END_TIME = [];
-		for (var i=0; i<24; i++){
-			self.END_TIME.push( i.toString() + ':' + '00');
-			self.END_TIME.push( i.toString() + ':' + '30');
-		}
-		self.end_day = ko.observable(0);
-		self.end_time = ko.observable('10:30');
-	}
 
 	var TopMenu = function () {
 		var self = this;
@@ -144,65 +83,34 @@ $(function () {
 		self.user = new User();
 		self.top_menu = new TopMenu();
 		self.waiting_mask = new WaitingMask();
-		
-		// order control
-		self.active_order_list = ko.observable();
-		self.order_detail = ko.observable();
-
-		// new order control
-		self.new_order = ko.observable();
-
-		self.clear_all_ui_binding = function () {
-			self.active_order_list(null);
-			self.order_detail(null);
-			self.new_order(null);
-		};
-
-		// activate client side route
-		Sammy(function() {
-			this.get('#order/:oid', function () {
-				self.top_menu.select_item('order');
-				self.clear_all_ui_binding();
-				self.waiting_mask.enable("載入中");
-
-				$.get("/order/" + this.params.oid, self.order_detail).always(function(){
-					self.waiting_mask.disable();
-				});				
-			});
-
-			this.get('#:top_menu_item', function () {
-				top_menu_item = this.params.top_menu_item;
-
-				self.top_menu.select_item(top_menu_item);
-				self.clear_all_ui_binding();
-				self.waiting_mask.enable("載入中");
-
-				switch(top_menu_item){
-					case "order":
-						$.get("/order/active", self.active_order_list).always(function(){
-							self.waiting_mask.disable();
-						});
-						break;
-					case "new":
-						$.get("/shop/simple", function (data) {
-							self.new_order (new NewOrderList());
-							shop_list = []
-							$.map(data, function (value, index) {
-								shop_list.push(new Shop(value));
-							});
-							self.new_order().shop_list(shop_list);
-
-						}).always(function () {
-							self.waiting_mask.disable();	
-						});
-						break;
-				}
-			});
-		}).run();
 	};
 
-	HopeBayUI.app = new AppView();
-	ko.applyBindings(HopeBayUI.app);
+	HBAPP.app = new AppView();
+	ko.applyBindings(HBAPP.app);
+
+	// activate client side route
+	Sammy(function() {
+		this.get('#order/:oid', function () {
+			HBAPP.app.top_menu.select_item('order');
+			HBAPP.unload_content();
+			HBAPP.load_content("hbapp/order_detail")
+		});
+
+		this.get('#:top_menu_item', function () {
+			top_menu_item = this.params.top_menu_item;
+			HBAPP.app.top_menu.select_item(top_menu_item);
+			HBAPP.unload_content();
+
+			switch(top_menu_item){
+				case "order":
+					HBAPP.load_content("hbapp/active_order")
+					break;
+				case "new":
+					HBAPP.load_content("hbapp/new_order")
+					break;
+			}
+		});
+	}).run();	
 });
 </script>
 
@@ -227,57 +135,8 @@ $(function () {
 			</div>
 		</div>
 
-		<div data-bind="with: active_order_list" class="row-fluid">
-			<!-- ko if: $data.length <= 0 -->
-			<div class="box no-active-order">
-				<div>
-				現在沒有任何開放中的團購，你是否要<a href="/#new">建立一個新的團購</a>?
-				</div>
-			</div>
-			<!-- /ko -->
-
-			<!-- ko if: $data.length > 0 -->
-			<h3>開放中的團購</h3>
-			<!-- /ko -->
-
-			<!-- ko foreach: $data -->
-			<div class="box" style="margin-top: 10px; margin-bottom: 10px;">
-				<div style="margin: 20px;">
-				<div class="page-header">
-					<a data-bind="attr: {href: '/#order/' + _id.$oid}" class="btn btn-primary pull-right">我要參加</a>
-					<h3 data-bind="text: name"></h3>
-				</div>
-				<p data-bind="text: description"></p>
-				</div>
-			</div>
-			<!-- /ko -->
+		<div id="hb-app-main">
 		</div>
-
-		<div data-bind="with: new_order" class="row-fluid">
-			<h3>建立新的團購</h3>
-
-			<ol>
-				<li>
-				<h4>選擇店家</h4>
-				<select 
-				class = "input-block-level"
-				data-bind="options: shop_list, 
-				optionsText: function(item) {return item.name() + ' - ' + item.description();},
-				value: order_list().shop"></select>
-				</li>
-
-				<li data-bind="with: order_list">
-				<h4>設定團購名稱（留白則直接使用店家名稱)</h4>
-				<input type="text"  class="input-block-level" data-bind="value: name, attr: {placeholder: $parent.shopname}" >
-				</li>
-
-				<li>
-				<h4>設定結束時間</h4>
-				<select data-bind="options: END_DAY, value: end_day"></select>  天後的  <select data-bind="options: END_TIME, value: end_time"></select>
-				</li>
-			</ol>
-		</div>
-
 	</div>
 
 	<!-- ko with: waiting_mask -->

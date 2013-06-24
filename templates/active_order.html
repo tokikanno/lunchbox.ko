@@ -1,0 +1,44 @@
+<div data-bind="with: active_order_list" class="row-fluid">
+	<!-- ko if: $data.length <= 0 -->
+	<div class="box no-active-order">
+		<div>
+		現在沒有任何開放中的團購，你是否要<a href="/#new">建立一個新的團購</a>?
+		</div>
+	</div>
+	<!-- /ko -->
+
+	<!-- ko if: $data.length > 0 -->
+	<h3>開放中的團購</h3>
+	<!-- /ko -->
+
+	<!-- ko foreach: $data -->
+	<div class="box" style="margin-top: 10px; margin-bottom: 10px;">
+		<div style="margin: 20px;">
+		<div class="page-header">
+			<a data-bind="attr: {href: '/#order/' + _id.$oid}" class="btn btn-primary pull-right">我要參加</a>
+			<h3 data-bind="text: name"></h3>
+		</div>
+		<p data-bind="text: description"></p>
+		</div>
+	</div>
+	<!-- /ko -->
+</div>
+
+<script type="text/javascript">
+$(function () {
+	var AppView = function () {
+		var self = this;
+		
+		self.active_order_list = ko.observable();
+
+		HBAPP.app.waiting_mask.enable("Loading");
+		$.get("/order/active", self.active_order_list).success(function  () {
+			HBAPP.show_content();
+		}).always(function(){
+			HBAPP.app.waiting_mask.disable();
+		});
+	};
+
+	ko.applyBindings(new AppView(), $('#hb-app-main')[0]);
+});
+</script>
