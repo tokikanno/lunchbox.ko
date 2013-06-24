@@ -128,7 +128,6 @@ $(function () {
 		// activate client side route
 		Sammy(function() {
 			this.get('#order/:oid', function () {
-				debugger
 				self.top_menu.select_item('order');
 				self.clear_all_ui_binding();
 				self.waiting_mask.enable("載入中");
