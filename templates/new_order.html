@@ -37,8 +37,6 @@ $(function () {
 				});
 			}
 		}
-
-		self.full_name = ko.computed(function () { return self.name() + " - " + self.description();})
 	};
 
 	var OrderItem = function (data) {
@@ -135,7 +133,7 @@ $(function () {
 		<select 
 		class = "input-block-level"
 		data-bind="options: shop_list, 
-		optionsText: function(item) {return item.name() + ' - ' + item.description();},
+		optionsText: function(item) {return item.description() ? item.name() + ' - ' + item.description() : item.name() ;},
 		value: order_list().shop"></select>
 		</li>
 
@@ -151,7 +149,7 @@ $(function () {
 
 		<li>
 		<h4>設定結束時間</h4>
-		<select data-bind="options: END_DAY, value: end_day"></select>  天後的  <select data-bind="options: END_TIME, value: end_time"></select>
+		<select data-bind="options: END_DAY, value: end_day, optionsText: function(item) { return item == 0 ? '今天' : item.toString() + ' 天後' }"></select>  的  <select data-bind="options: END_TIME, value: end_time"></select>
 		</li>
 	</ol>
 

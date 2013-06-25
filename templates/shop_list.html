@@ -37,8 +37,6 @@ $(function () {
 				});
 			}
 		}
-
-		self.full_name = ko.computed(function () { return self.name() + " - " + self.description();});
 	};
 
 	var OrderItem = function (data) {
@@ -84,6 +82,16 @@ $(function () {
 </script>
 
 <div data-bind="with: shop_list" class="row-fluid">
+	<!-- ko if: $data.length <= 0 -->
+	<div class="box no-active-order">
+		<div>
+		現在沒有任何店家資料，你是否要<a href="/#shop/new">新增一個新店家</a>?
+		</div>
+	</div>
+	<!-- /ko -->
+
+
+	<!-- ko if: $data.length > 0 -->
 	<h3>店家列表</h3>
 
 	<div class="pull-right">
@@ -113,4 +121,5 @@ $(function () {
 		<!-- /ko -->
 		</tbody>
 	</table>
+	<!-- /ko -->
 </div>
