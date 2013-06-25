@@ -43,10 +43,10 @@ var HBAPP = {
 
 	load_content: function(source){
 		var app_main = $('#hb-app-main');
-
-		if (document.getElementById(source)){
-			app_main.html($("#" + source).html());
-			app_main.show();
+		var template = document.getElementById(source);
+		if (template && $(template).is("[type='text/template']")){
+			app_main.html($("#" + source).html())
+			        .show();
 		} else {
 			$.get(source, function (data) {
 				app_main.html(data);
