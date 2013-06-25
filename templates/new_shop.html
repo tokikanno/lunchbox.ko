@@ -1,0 +1,95 @@
+<script type="text/javascript">
+
+$(function () {
+	var ShopItem = function (data) {
+		var self = this;
+
+		self.name = ko.observable();
+		self.price = ko.observable();
+
+		if (data){
+			self.name(data.name);
+			self.price(data.price);
+		}
+	};
+
+	var Shop = function (data) {
+		var self = this;
+
+		self._id = ko.observable();
+		self.name = ko.observable();
+		self.description = ko.observable();
+		self.phone = ko.observable();
+		self.addr = ko.observable();
+		self.items = ko.observableArray();
+
+		if (data){
+			self._id(data._id.$oid);
+			self.name(data.name);
+			self.description(data.description);
+			self.phone(data.phone);
+			self.addr(data.addr);
+			if (data.items){
+				data.items().removeAll();
+				$.map(data.items, function (val, index) {
+					item = new ShopItem(val);
+					data.items().push(item);
+				});
+			}
+		}
+
+		self.full_name = ko.computed(function () { return self.name() + " - " + self.description();});
+	};
+
+	var AppView = function () {
+		var self = this;
+		
+		// new order control
+		self.shop = ko.observable(new Shop());
+		self.submit = function () {
+			
+		};
+
+		HBAPP.show_content();
+	};
+
+	ko.applyBindings(new AppView(), $('#hb-app-main')[0]);
+});
+</script>
+
+<div data-bind="with: shop" class="row-fluid">
+	<h3>新增店家</h3>
+
+	<form data-bind="submit: $root.submit">
+	<ol>
+		<li>
+		<h4>店家名稱</h4>
+		<input type="text"  class="input-block-level" data-bind="value: name", placeholder="店家名稱" required minlength=4 maxlength=50>
+		</li>
+
+		<li>
+		<h4>店家描述</h4>
+		<input type="text"  class="input-block-level" data-bind="value: description", placeholder="店家描述" maxlength=140>
+		</li>
+
+		<li>
+		<h4>店家電話</h4>
+		<input type="text"  class="input-block-level" data-bind="value: phone", placeholder="店家電話" required minlength=10 maxlength=20>
+		</li>
+
+		<li>
+		<h4>店家地址</h4>
+		<input type="text"  class="input-block-level" data-bind="value: addr", placeholder="店家地址" required minlength=10 maxlength=20>
+		</li>
+
+		<li>
+		<h4>店家商品</h4>
+		</li>
+	</ol>
+
+	<hr>
+
+	<button class="btn btn-primary pull-right" type="submit">新增</button>
+
+	</form>	
+</div>

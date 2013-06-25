@@ -38,7 +38,7 @@ $(function () {
 			}
 		}
 
-		self.full_name = ko.computed(function () { return self.name() + " - " + self.description();})
+		self.full_name = ko.computed(function () { return self.name() + " - " + self.description();});
 	};
 
 	var OrderItem = function (data) {
@@ -86,8 +86,31 @@ $(function () {
 <div data-bind="with: shop_list" class="row-fluid">
 	<h3>店家列表</h3>
 
-	<!-- ko foreach: $data -->
-	<div data-bind="text: name"></div>
-	<!-- /ko -->
-</div>
+	<div class="pull-right">
+	<a  href="/#shop/new" class="btn btn-small btn-primary"><i class="icon-plus icon-white"></i> 新增店家</a></div>
 
+	<table class="table" >
+		<thead>
+		<tr>
+			<th>店名</th>
+			<th>描述</th>
+			<th></th>
+		</tr>
+		</thead>
+		<tbody>
+		<!-- ko foreach: $data -->
+		<tr>
+			<td data-bind="text: name"></td>
+			<td data-bind="text: description"></td>
+			<td>
+				<div class="pull-right">
+				<a data-bind="attr: {href: '/#shop/edit/' + _id()}" class="btn btn-link"><i class="icon-pencil"></i> 編輯</a>
+				<a data-bind="attr: {href: '/#shop/delete/' + _id()}" class="btn btn-link"><i class="icon-remove"></i> 刪除</a>
+				<a data-bind="attr: {href: '/#shop/' + _id()}" class="btn btn-link"><i class="icon-glass"></i> 開團</a>
+				</div>
+			</td>
+		</tr>
+		<!-- /ko -->
+		</tbody>
+	</table>
+</div>

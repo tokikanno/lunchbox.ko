@@ -123,7 +123,13 @@ $(function () {
 		this.get('#order/:oid', function () {
 			HBAPP.app.top_menu.select_item('order');
 			HBAPP.unload_content();
-			HBAPP.load_content("hbapp/order_detail")
+			HBAPP.load_content("hbapp/order_detail");
+		});
+
+		this.get('#shop/new', function () {
+			HBAPP.app.top_menu.select_item('shop');
+			HBAPP.unload_content();
+			HBAPP.load_content("hbapp/new_shop");
 		});
 
 		this.get('#:top_menu_item', function () {
