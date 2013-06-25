@@ -133,10 +133,13 @@ $(function () {
 
 			switch(top_menu_item){
 				case "order":
-					HBAPP.load_content("hbapp/active_order")
+					HBAPP.load_content("hbapp/active_order");
 					break;
 				case "new":
-					HBAPP.load_content("hbapp/new_order")
+					HBAPP.load_content("hbapp/new_order");
+					break;
+				case "shop":
+					HBAPP.load_content("hbapp/shop_list");
 					break;
 				case "403":
 					HBAPP.load_content("403-template");
