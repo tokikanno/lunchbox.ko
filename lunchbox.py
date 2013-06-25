@@ -18,7 +18,8 @@ urls = (
 	'/logout', 'logout',
 	'/hbapp/(.+)', 'hbapp',
 	'/order/active', 'active_order',
-	'/new_order/', 'new_order',
+	'/new_order', 'new_order',
+	'/save_shop', 'save_shop',
 	'/shop/simple', 'simple_shop',
 	'/401', 'Unauthorized',
 	'/403', 'Forbidden',
@@ -133,6 +134,25 @@ class login:
 class new_order:
 	def POST(self):
 		return ""
+
+class save_shop:
+	def POST(self):
+		result = {
+			"result": False,
+			"msg" : None,
+			"data": None,
+		}
+
+		try:
+			data = load_json()
+			assert data, "bad POST data"
+			DB['shop'].save(data)
+			result["result"] = True
+		except Exception, e:
+			result["msg"] = str(e)
+
+		return json_resp(result)
+
 
 class active_order:
 	def GET(self):
