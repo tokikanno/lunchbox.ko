@@ -49,7 +49,7 @@ $(function () {
 		self.new_order = ko.observable();
 
 		HBAPP.app.waiting_mask.enable("載入中");
-		$.get("/shop/simple", function (data) {
+		$.get("/shop", function (data) {
 			self.new_order (new NewOrderList());
 			shop_list = [];
 			$.map(data, function (value, index) {
