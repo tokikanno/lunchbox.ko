@@ -4,6 +4,7 @@
 
 	<script type="text/javascript" src="/static/lib/knockout/knockout-2.2.1.js"></script>
 	<script type="text/javascript" src="/static/lib/knockout/ko.observableDictionary.js"></script>
+	<script type="text/javascript" src="/static/lib/knockout/ko.numericObservable.js"></script>
 
 	<script type="text/javascript" src="/static/lib/jquery/jquery-1.10.1.min.js"></script>
 	<script type="text/javascript" src="/static/lib/jquery/jquery.validate.min.js"></script>
@@ -66,7 +67,7 @@ var HBAPP = {
 			var self = this;
 
 			self.name = ko.observable();
-			self.price = ko.observable(0);
+			self.price = ko.numericObservable(0);
 
 			if (data){
 				self.name(data.name);
