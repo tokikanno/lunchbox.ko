@@ -3,6 +3,7 @@ from bson.json_util import dumps, loads
 
 from webpy_mongodb_sessions.session import MongoStore
 from pymongo import Connection
+from bson.objectid import ObjectId
 
 import os
 from jinja2 import Environment,FileSystemLoader
@@ -19,8 +20,8 @@ urls = (
 	'/hbapp/(.+)', 'hbapp',
 	'/order/active', 'active_order',
 	'/new_order', 'new_order',
-	'/save_shop', 'save_shop',
-	'/shop/simple', 'simple_shop',
+	'/shop', 'shop',
+	'/shop/([\w\d]+)', 'shop',
 	'/401', 'Unauthorized',
 	'/403', 'Forbidden',
 )
@@ -152,6 +153,36 @@ class save_shop:
 			result["msg"] = str(e)
 
 		return json_resp(result)
+
+
+class shop:
+	def GET(self, shop_id=None):
+		if not shop_id:
+			return json_resp(list(DB['shop'].find({}, {'name': 1, 'description': 1})))
+		else:
+			oid = ObjectId(shop_id)
+			return json_resp(DB['shop'].find_one({'_id': oid}))
+
+	def POST(self,):
+		result = {
+			"result": False,
+			"msg" : None,
+			"data": None,
+		}
+
+		try:
+			data = load_json()
+			assert data, "bad POST data"
+			DB['shop'].save(data)
+			result["result"] = True
+		except Exception, e:
+			result["msg"] = str(e)
+
+		return json_resp(result)		
+
+	def DELETE(self, shop_id):
+		oid = ObjectId(shop_id)
+		DB['shop'].remove({'_id': oid})
 
 
 class active_order:
