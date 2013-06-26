@@ -98,8 +98,6 @@ var HBAPP = {
 					});
 				}
 			}
-
-			self.full_name = ko.computed(function () { return self.name() + " - " + self.description();});
 		},
 
 		OrderItem: function (data) {
@@ -197,7 +195,13 @@ $(function () {
 		this.get('#shop/new', function () {
 			HBAPP.app.top_menu.select_item('shop');
 			HBAPP.unload_content();
-			HBAPP.load_content("hbapp/new_shop");
+			HBAPP.load_content("hbapp/edit_shop");
+		});
+
+		this.get('#shop/edit/:oid', function () {
+			HBAPP.app.top_menu.select_item('shop');
+			HBAPP.unload_content();
+			HBAPP.load_content("hbapp/edit_shop");
 		});
 
 		this.get('#:top_menu_item', function () {
@@ -213,7 +217,7 @@ $(function () {
 					HBAPP.load_content("hbapp/new_order");
 					break;
 				case "shop":
-					HBAPP.load_content("hbapp/shop_list");
+					HBAPP.load_content("hbapp/list_shop");
 					break;
 				case "403":
 					HBAPP.load_content("403-template");

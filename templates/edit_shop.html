@@ -1,0 +1,150 @@
+<script type="text/javascript">
+
+$(function () {
+	var AppView = function () {
+		var self = this;
+		
+		// new order control
+		self.shop = ko.observable();
+
+		// binding function for add a shop item to shop
+		self.add_shop_item = function (item) {
+			self.shop().items.push(new HBAPP.CLASSES.ShopItem());
+		};
+
+		// binding funtion for remove a shop item from shop
+		self.remove_shop_item = function (item) {
+			self.shop().items.remove(item);
+		};
+
+		self.get_oid_from_hash = function () {
+			if (/^#shop\/edit/.exec(location.hash))
+				return location.hash.lastIndexOf('/') >= 0 ?  location.hash.substring(location.hash.lastIndexOf('/')+1) : null;
+			else
+				return null;
+		};
+
+		self.submit = function () {
+			data = ko.toJSON(self.shop());
+
+			HBAPP.app.waiting_mask.enable("存檔中");
+			$.post('/shop', data).done(function (data) {
+				if (data.result){
+					location.href = "/#shop";
+				}else{
+					alert("儲存店家失敗，原因: " + result.msg);
+				}
+			}).always(function () {
+				HBAPP.app.waiting_mask.disable();
+			})
+		};
+
+		self.generate_debug_data = function () {
+			self.shop().name("捅二超商");
+			self.shop().description("黑心企業，滿500元外送");
+			self.shop().phone("0912-123-123");
+			self.shop().addr("台灣省黑心路2段56號");
+			self.shop().items.push({
+				name: '毒澱粉布丁',
+				price: 15
+			});
+
+			self.shop().items.push({
+				name: '塑化劑飲料',
+				price: 30
+			});
+		};
+
+		HBAPP.app.waiting_mask.enable("載入中");
+		if (self.get_oid_from_hash()){
+			$.get("/shop/" + self.get_oid_from_hash()).done(function (data) {
+				self.shop(new HBAPP.CLASSES.Shop(data));
+			}).always(function () {
+				HBAPP.app.waiting_mask.disable();	
+			});
+
+			self.debug = false;
+			self.title_prefix = "修改店家";
+		}else{
+			self.shop(new HBAPP.CLASSES.Shop());
+			self.title_prefix = "新增店家";
+			self.debug = true;
+			HBAPP.app.waiting_mask.disable();	
+		}
+
+		HBAPP.show_content();
+	};
+
+	ko.applyBindings(new AppView(), $('#hb-app-main')[0]);
+});
+</script>
+
+<div data-bind="with: shop" class="row-fluid">
+	<h3 data-bind="text: $root.title_prefix"></h3>
+
+	<form data-bind="submit: $root.submit">
+	<ol>
+		<li>
+		<h4><b>店家名稱 *</b></h4>
+		<input type="text"  class="input-block-level" data-bind="value: name", placeholder="店家名稱" required minlength=4 maxlength=50>
+		</li>
+
+		<li>
+		<h4>店家描述(非必填)</h4>
+		<input type="text"  class="input-block-level" data-bind="value: description", placeholder="店家描述 (EX: 推薦商品 / 滿多少錢才外送 / 訂購時限)" maxlength=140>
+		</li>
+
+		<li>
+		<h4><b>店家電話 *</b></h4>
+		<input type="text"  class="input-block-level" data-bind="value: phone", placeholder="店家電話" required minlength=10 maxlength=20>
+		</li>
+
+		<li>
+		<h4>店家地址(非必填)</h4>
+		<input type="text"  class="input-block-level" data-bind="value: addr", placeholder="店家地址" minlength=10 maxlength=50>
+		</li>
+	
+		<li>
+		<h4>店家商品</h4>
+
+		<table class="table" style="background: white;">
+			<thead>
+				<tr>
+					<th>品名</th>
+					<th>價格</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody data-bind="foreach: items">
+				<tr>
+					<td><input type="text" data-bind="value: name" class="input-block-level" placeholder="商品名稱" required minlength=2 maxlength=50></td>
+					<td><input type="number" data-bind="value: price" class="input-block-level" min=0></td>
+					<td>
+						<div class="pull-right">
+						<a href="#" data-bind="click: $root.remove_shop_item" class="btn btn-link">
+						<i class="icon-remove"></i> 刪除</a>
+						</div>
+					</td>
+				</tr>
+			</tbody>
+			<tfoot>
+				<tr>
+					<td colspan=3> 
+						<a href="#" data-bind="click: $root.add_shop_item" class="btn btn-small pull-right">
+							<i class="icon-plus"></i> 新增商品
+						</a>
+					</td>
+				</tr>
+			</tfoot>
+		</table>
+
+		</li>
+	</ol>
+
+	<button class="btn btn-primary pull-right" type="submit" data-bind="text: $root.title_prefix"></button>
+	</form>	
+</div>
+
+<div style="margin-top: 50px;" data-bind="visible: debug">
+	<a class="btn btn-inverse pull-right" href="#" data-bind="click: $root.generate_debug_data">產生 Debug 資料</a>
+</div>
