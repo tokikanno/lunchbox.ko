@@ -1,73 +1,21 @@
 <script type="text/javascript">
 
 $(function () {
-	var ShopItem = function (data) {
-		var self = this;
-
-		self.name = ko.observable();
-		self.price = ko.observable();
-
-		if (data){
-			self.name(data.name);
-			self.price(data.price);
-		}
-	};
-
-	var Shop = function (data) {
-		var self = this;
-
-		self._id = ko.observable();
-		self.name = ko.observable();
-		self.description = ko.observable();
-		self.phone = ko.observable();
-		self.addr = ko.observable();
-		self.items = ko.observableArray();
-
-		if (data){
-			self._id(data._id.$oid);
-			self.name(data.name);
-			self.description(data.description);
-			self.phone(data.phone);
-			self.addr(data.addr);
-			if (data.items){
-				data.items().removeAll();
-				$.map(data.items, function (val, index) {
-					item = new ShopItem(val);
-					data.items().push(item);
-				});
-			}
-		}
-	};
-
-	var OrderItem = function (data) {
-		var self = this;
-		self.name = ko.observable();
-		self.user = ko.observable();
-		self.price = ko.observable();
-		self.count = ko.observable();
-	};
-
-	var OrderList = function () {
-		var self = this;
-
-		self.name = ko.observable();
-		self.description = ko.observable();
-		self.owner = ko.observable();
-		self.shop = ko.observable();
-		self.items = ko.observableArray();
-	};
-
 	var AppView = function () {
 		var self = this;
 		
 		// new order control
 		self.shop_list = ko.observableArray();
 
+		self.delete_shop = function (shop) {
+			HBAPP.app.waiting_mask.enable("刪除中");
+		};
+
 		HBAPP.app.waiting_mask.enable("載入中");
 		$.get("/shop/simple", function (data) {
 			shop_list = [];
 			$.map(data, function (value, index) {
-				shop_list.push(new Shop(value));
+				shop_list.push(new HBAPP.CLASSES.Shop(value));
 			});
 			self.shop_list(shop_list);
 

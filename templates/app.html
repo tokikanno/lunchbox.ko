@@ -58,7 +58,70 @@ var HBAPP = {
 
 	show_content: function  () {
 		$('#hb-app-main').show();
-	}
+	},
+
+	// classes holder for global access
+	CLASSES: {
+		ShopItem: function (data) {
+			var self = this;
+
+			self.name = ko.observable();
+			self.price = ko.observable(0);
+
+			if (data){
+				self.name(data.name);
+				self.price(data.price);
+			}
+		},
+
+		Shop: function (data) {
+			var self = this;
+
+			self._id = ko.observable();
+			self.name = ko.observable();
+			self.description = ko.observable();
+			self.phone = ko.observable();
+			self.addr = ko.observable();
+			self.items = ko.observableArray([]);
+
+			if (data){
+				self._id(data._id);
+				self.name(data.name);
+				self.description(data.description);
+				self.phone(data.phone);
+				self.addr(data.addr);
+				if (data.items){
+					self.items.removeAll();
+					$.map(data.items, function (val, index) {
+						item = new HBAPP.CLASSES.ShopItem(val);
+						self.items.push(item);
+					});
+				}
+			}
+
+			self.full_name = ko.computed(function () { return self.name() + " - " + self.description();});
+		},
+
+		OrderItem: function (data) {
+			var self = this;
+			self.name = ko.observable();
+			self.user = ko.observable();
+			self.price = ko.observable();
+			self.count = ko.observable();
+		},
+
+		OrderList: function () {
+			var self = this;
+
+			self.name = ko.observable();
+			self.description = ko.observable();
+			self.owner = ko.observable();
+			self.shop = ko.observable();
+			self.items = ko.observableArray();
+		},
+
+		CLASSESS_END_HERE: null
+	}	
 };
 
 $(function () {
@@ -116,6 +179,11 @@ $(function () {
 
 	// activate client side route
 	Sammy(function() {
+		// do not let sammy check form submission
+		this._checkFormSubmission = function(form) {
+       			 return (false);
+    		};
+
 		this.get('/', function () {
 			this.redirect('/#order');
 		});
