@@ -9,10 +9,20 @@ $(function () {
 
 		self.delete_shop = function (shop) {
 			HBAPP.app.waiting_mask.enable("刪除中");
+			$.ajax({
+				url: "/shop/" + shop._id().$oid,
+				method: "DELETE"
+			}).done(function () {
+				self.shop_list.remove(shop);
+			}).fail(function () {
+				alert("刪除失敗");	
+			}).always(function () {
+				HBAPP.app.waiting_mask.disable();	
+			});
 		};
 
 		HBAPP.app.waiting_mask.enable("載入中");
-		$.get("/shop/simple", function (data) {
+		$.get("/shop", function (data) {
 			shop_list = [];
 			$.map(data, function (value, index) {
 				shop_list.push(new HBAPP.CLASSES.Shop(value));
@@ -60,8 +70,8 @@ $(function () {
 			<td data-bind="text: description"></td>
 			<td>
 				<div class="pull-right">
-				<a data-bind="attr: {href: '/#shop/edit/' + _id()}" class="btn btn-link"><i class="icon-pencil"></i> 編輯</a>
-				<a data-bind="attr: {href: '/#shop/delete/' + _id()}" class="btn btn-link"><i class="icon-remove"></i> 刪除</a>
+				<a data-bind="attr: {href: '/#shop/edit/' + _id().$oid}" class="btn btn-link"><i class="icon-pencil"></i> 編輯</a>
+				<a data-bind="click: $root.delete_shop" href="#" class="btn btn-link"><i class="icon-remove"></i> 刪除</a>
 				<a data-bind="attr: {href: '/#shop/' + _id()}" class="btn btn-link"><i class="icon-glass"></i> 開團</a>
 				</div>
 			</td>
