@@ -1,6 +1,76 @@
 <script type="text/javascript">
 
 $(function () {
+	var DateTimeInput = function () {
+		var self = this;
+
+		self.DAY_SELECTIONS  = (function () {
+			var result = [];
+			var days = [0, 1, 3, 7, 14];
+			for (var i in days){
+				item = {
+					value: days[i]
+				};
+
+				switch (item.value){
+					case 0:
+						item.text = "今天";
+						break;
+					case 1:
+						item.text = "明天";
+						break;
+					default:
+						item.text = item.value.toString() + ' 天後';
+				}
+
+				result.push(item);
+			}
+
+			return result;
+		})();
+
+		self.TIME_SELECTIONS = (function () {
+			var result = [];
+			for (var i=0; i<24; i++){
+				result.push({
+					hour: i,
+					min: 0,
+					text: i.toString() + ":" + "00"
+				});
+				result.push({
+					hour: i,
+					min: 30,
+					text: i.toString() + ":" + "30"
+				});
+			}
+			return result;
+		})();
+
+		self.selected_day = ko.observable(self.DAY_SELECTIONS[0]);
+		self.selected_time = ko.observable(self.TIME_SELECTIONS[21]);
+
+		self._datetime = function(){
+			var result = moment();
+
+			result.add("days", self.selected_day().value);
+			result.hours(self.selected_time().hour);
+			result.minutes(self.selected_time().min);
+			result.seconds(0);
+
+			return result;
+		};
+
+		self.datetime = ko.computed(function(){
+			return self._datetime().format("YYYY/MM/DD HH:mm:ss");
+		});
+
+		self.lesser_than_now = ko.computed(function(){
+			var now = moment();
+			var datetime = self._datetime();
+			return datetime.isBefore(now);
+		});
+	};
+
 	var NewOrderList = function () {
 		var self = this;
 
@@ -14,23 +84,19 @@ $(function () {
 			return self.order_list().shop().name();
 		});
 
-		self.END_DAY = [0, 1, 3, 7, 14];
-		self.END_TIME = [];
-		for (var i=0; i<24; i++){
-			self.END_TIME.push( i.toString() + ':' + '00');
-			self.END_TIME.push( i.toString() + ':' + '30');
-		}
-		self.end_day = ko.observable(0);
-		self.end_time = ko.observable('10:30');
-
+		self.datetime_input = new DateTimeInput();
 		self.submit = function (elem) {
+			if (self.datetime_input.lesser_than_now()){
+				alert("團購結束時間必需大於現在時間");
+				return;
+			}
+
 			HBAPP.app.waiting_mask.enable("載入中");	
 
 			data = {
 				name: self.order_list().name() ? self.order_list().name() : self.shopname() ,
 				description: self.order_list().description(),
-				end_day: self.end_day(),
-				end_time: self.end_time(),
+				end_time: self.datetime_input._datetime().toJSON(),
 				shop: self.order_list().shop()._id()
 			};
 
@@ -93,7 +159,14 @@ $(function () {
 
 		<li>
 		<h4>設定結束時間</h4>
-		<select data-bind="options: END_DAY, value: end_day, optionsText: function(item) { return item == 0 ? '今天' : item.toString() + ' 天後' }"></select>  的  <select data-bind="options: END_TIME, value: end_time"></select>
+		<select  data-bind="options: datetime_input.DAY_SELECTIONS, optionsText: 'text', value: datetime_input.selected_day"></select>
+		  的  
+		<select  data-bind="options: datetime_input.TIME_SELECTIONS, optionsText: 'text', value: datetime_input.selected_time"></select>
+		<div>
+			結束時間: 
+			<span data-bind="text: datetime_input.datetime"></span>
+			<span data-bind="visible: datetime_input.lesser_than_now" style="color: red;"> <b>*結束時間必需大於現在時間</b></span>
+		</div>
 		</li>
 	</ol>
 
