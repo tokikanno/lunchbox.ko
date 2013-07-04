@@ -86,13 +86,15 @@ $(function () {
 		<!-- ko with: login_form -->
 		<form data-bind="submit: login" class="form-signin">
 			<h2 class="form-signin-heading">Lunch Box 登入</h2>
+			
 			<!-- ko if: login_error -->
 			<div class="alert alert-error fade in">
-	            <button type="button" class="close" data-dismiss="alert">×</button>
-	            <strong>登入錯誤 !</strong>&nbsp;&nbsp;<!-- ko text: login_error --><!-- /ko -->
-          	</div>
-          	<!-- /ko -->
-			<input data-bind="value: username" name="email" type="email" class="input-block-level" placeholder="電子郵件" required>
+	            		<button type="button" class="close" data-dismiss="alert">×</button>
+	            		<strong>登入錯誤 !</strong>&nbsp;&nbsp;<!-- ko text: login_error --><!-- /ko -->
+          			</div>
+          			<!-- /ko -->
+
+			<input data-bind="value: username" name="email" type="text" class="input-block-level" placeholder="帳號" required minlength=4 maxlength=30>
 			<input data-bind="value: password" type="password" name="password" class="input-block-level" placeholder="密碼" required minlength=4 maxlength=10>
 			<button class="btn btn-primary pull-right" type="submit">登入</button>
 		</form>
