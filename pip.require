@@ -2,3 +2,4 @@ web.py
 jinja2
 gevent
 -e git+https://github.com/whilefalse/webpy-mongodb-sessions/#egg=web_mongodb_sessions
+python-ldap

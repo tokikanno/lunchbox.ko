@@ -1,2 +1,5 @@
 python-dev
 libevent-dev
+# for python-ldap
+libldap2-dev
+libsasl2-dev
